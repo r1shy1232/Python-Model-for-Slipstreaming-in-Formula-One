@@ -1,0 +1,146 @@
+SLIPSTREAM MODEL - HOW TO RUN (Windows, VS Code, PowerShell)
+=============================================================
+
+BEFORE YOU START
+- Python 3.12 or 3.13 installed (3.13.5 is fine).
+- Keep the project OUT of OneDrive (the cache grows to several GB).
+  Recommended location: C:\Projects\slipstream_model_full\slipstream_model
+- That inner "slipstream_model" folder must contain: src, cache, output,
+  README.md. The src folder contains 7 .py files (analyse_eras.py,
+  config.py, corners.py, run_analysis.py, straights.py, telemetry.py,
+  test_synthetic.py).
+- Delete any old .venv or .venv-1 folders from earlier attempts.
+
+
+PART 1 - ONE-TIME SETUP (never repeat unless you move the folder
+or delete .venv)
+-------------------------------------------------------------
+1. Open VS Code. File > Open Folder > choose the INNER slipstream_model
+   folder (the one that contains src).
+2. Terminal > New Terminal.
+3. Paste these one at a time, in order:
+
+   cd C:\Projects\slipstream_model_full\slipstream_model
+
+   dir
+
+   (Check that the list shows: src, cache, output, README.md.)
+
+   python -m venv .venv
+
+   (If "python" is not recognised, use: py -m venv .venv)
+
+   .\.venv\Scripts\python.exe -m pip install fastf1==3.8.3 pandas numpy scipy matplotlib
+
+   (Takes a few minutes. The "new release of pip" notice is harmless.)
+
+   cd src
+
+   ..\.venv\Scripts\python.exe test_synthetic.py
+
+4. The last line of the test output must say:
+   ALL SYNTHETIC TESTS PASSED
+   If it does not, copy the whole output and send it to Claude.
+5. If VS Code pops up asking to use the new environment, click Yes.
+
+
+PART 2 - QUICK TEST ON TWO CIRCUITS (do this before the full run)
+-------------------------------------------------------------
+Open the terminal in the src folder:
+
+   cd C:\Projects\slipstream_model_full\slipstream_model\src
+
+Then:
+
+   ..\.venv\Scripts\python.exe run_analysis.py Italian British
+
+   ..\.venv\Scripts\python.exe analyse_eras.py
+
+- First run downloads the data, so it takes a while (Italian = Monza,
+  British = Silverstone, 2021 and 2022 each).
+- With only two circuits the paired-by-circuit table will be thin. That
+  is expected. This step only checks that everything runs.
+- At the end of run_analysis.py a SUMMARY block lists which sessions
+  loaded and how many straight and corner events were found.
+
+
+PART 3 - FULL RUN (all 8 circuits, 2021 vs 2022)
+-------------------------------------------------------------
+From inside src:
+
+   ..\.venv\Scripts\python.exe run_analysis.py
+
+   ..\.venv\Scripts\python.exe analyse_eras.py
+
+- 16 sessions. Expect a long run (possibly an hour or more) and several
+  GB of disk space in the cache folder.
+- Keep the laptop plugged in and stop Windows from sleeping while it
+  runs. Do not close the terminal.
+- A session that fails prints "!! Skipped ..." and the script carries on.
+- Results are only written at the very END of run_analysis.py. If the run
+  is interrupted you lose that run's results, but the downloaded cache
+  stays, so running it again is much faster.
+- To see the full error for a skipped session, add --debug:
+   ..\.venv\Scripts\python.exe run_analysis.py --debug
+
+
+PART 4 - WHAT YOU GET
+-------------------------------------------------------------
+Everything is saved in the output folder:
+   straight_events.csv                  every straight-line event
+   corner_events.csv                    every corner event
+   era_difference_pooled.csv            2022 minus 2021, with 95% CIs
+   era_difference_paired_circuits.csv   same-circuit comparison
+   penalty_ratio.csv                    downforce loss / drag reduction
+   fig_paired_circuits.png              per-circuit 2021 vs 2022
+   fig_pooled_distributions.png         event distributions by era
+   fig_penalty_ratio.png                penalty ratio vs literature (~3)
+
+
+PART 5 - WHAT TO SEND CLAUDE
+-------------------------------------------------------------
+1. The SUMMARY block at the end of run_analysis.py
+   (sessions loaded and event counts).
+2. The three tables printed by analyse_eras.py.
+3. Any error messages: copy the whole thing, not just the last line.
+
+
+PART 6 - NEXT TIME YOU OPEN THE PROJECT (no setup needed)
+-------------------------------------------------------------
+   cd C:\Projects\slipstream_model_full\slipstream_model\src
+
+   ..\.venv\Scripts\python.exe run_analysis.py
+
+   ..\.venv\Scripts\python.exe analyse_eras.py
+
+
+TROUBLESHOOTING
+-------------------------------------------------------------
+"..\.venv\Scripts\python.exe is not recognized"
+   You are not inside the src folder, or the .venv was never created.
+   Check with:  pwd   and   dir ..
+   pwd must end in \slipstream_model\src, and dir .. must list .venv.
+   If .venv is missing, redo Part 1.
+
+"No module named numpy" (or pandas, fastf1, scipy, matplotlib)
+   The packages are not installed in this environment. Run:
+   cd ..
+   .\.venv\Scripts\python.exe -m pip install fastf1 pandas numpy scipy matplotlib
+   cd src
+
+"can't open file ... run_analysis.py"
+   You are in the wrong folder. cd into the src folder first.
+
+"python is not recognized"
+   Use "py" instead of "python" for the venv creation command, or
+   reinstall Python and tick "Add python.exe to PATH".
+
+Every session says "!! Skipped"
+   Try:  ..\.venv\Scripts\python.exe -m pip install -U fastf1
+   then run again. If it still fails, send Claude the first 30 lines.
+
+Pip/build errors during install
+   Send Claude the last 15 lines of the error.
+
+You do NOT need to activate the environment. Calling the venv's python
+by its path (as above) always uses the right packages.
