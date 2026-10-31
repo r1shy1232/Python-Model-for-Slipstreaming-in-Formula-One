@@ -40,7 +40,7 @@ or delete .venv)
 
 4. The last line of the test output must say:
    ALL SYNTHETIC TESTS PASSED
-   If it does not, copy the whole output and send it to Claude.
+
 5. If VS Code pops up asking to use the new environment, click Yes.
 
 
@@ -97,7 +97,7 @@ Everything is saved in the output folder:
    fig_penalty_ratio.png                penalty ratio vs literature (~3)
 
 
-PART 5 - WHAT TO SEND CLAUDE
+PART 5 - 
 -------------------------------------------------------------
 1. The SUMMARY block at the end of run_analysis.py
    (sessions loaded and event counts).
@@ -137,10 +137,10 @@ TROUBLESHOOTING
 
 Every session says "!! Skipped"
    Try:  ..\.venv\Scripts\python.exe -m pip install -U fastf1
-   then run again. If it still fails, send Claude the first 30 lines.
+   then run again.
 
 Pip/build errors during install
-   Send Claude the last 15 lines of the error.
+
 
 You do NOT need to activate the environment. Calling the venv's python
 by its path (as above) always uses the right packages.
